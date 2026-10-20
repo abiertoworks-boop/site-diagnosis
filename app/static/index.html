@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Webサイト診断</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#14284b;--sub:#5b6472;--line:#dfe6f2;--accent:#2a6df4;--warn:#c62828;--ok:#1b8a5a;--soft:#eef3fc}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1624;--card:#172033;--ink:#e8eefc;--sub:#9aa7bf;--line:#2a3550;--accent:#6c9bff;--warn:#ff8a80;--ok:#5bd4a0;--soft:#1d2842}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 "Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 80px}
+h1{font-size:26px;margin:8px 0 4px}
+.lead{color:var(--sub);margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin:16px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+input[type=url],input[type=text]{flex:1;min-width:240px;padding:13px 14px;font:inherit;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+button.primary{padding:13px 22px;font:inherit;font-weight:700;color:#fff;background:var(--accent);border:0;border-radius:10px;cursor:pointer}
+button.primary:disabled{opacity:.5;cursor:not-allowed}
+label.agree{display:flex;gap:8px;align-items:flex-start;margin:12px 0 0;color:var(--sub);font-size:14px}
+.notes{color:var(--sub);font-size:14px;margin:10px 0 0;padding-left:1.2em}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin:10px 0 6px}
+.bar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .5s}
+.err{border-color:var(--warn)}.err h2{color:var(--warn)}
+h2{font-size:19px;margin:0 0 10px}
+.summary{white-space:pre-wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.item{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--bg)}
+.item b{display:block}.dots{letter-spacing:2px;color:var(--accent)}.todo{color:var(--sub);font-size:14px}
+.item p{margin:6px 0 0;font-size:14px;color:var(--sub)}
+.chip{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--sub)}
+.chip.hi{color:var(--warn);border-color:var(--warn)}
+details{border:1px solid var(--line);border-radius:10px;margin:8px 0;background:var(--bg)}
+summary{cursor:pointer;padding:12px 14px;font-weight:700}
+.body{padding:0 14px 12px;font-size:15px}.body dt{color:var(--sub);font-size:13px;margin-top:8px}.body dd{margin:0}
+.mock img{width:100%;height:auto;border:1px solid var(--line);border-radius:10px;cursor:zoom-in;background:#fff}
+.mock p{font-size:14px;color:var(--sub);margin:6px 0 18px}
+.dl{display:inline-block;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:700;color:#fff;background:var(--ok)}
+.banner{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--sub)}
+ul.plain{margin:6px 0;padding-left:1.2em;color:var(--sub);font-size:14px}
+.tabs{display:flex;gap:6px;margin:0 0 14px;border-bottom:1px solid var(--line)}
+.tab{padding:10px 16px;font:inherit;font-weight:700;color:var(--sub);background:none;border:0;border-bottom:3px solid transparent;cursor:pointer}
+.tab[aria-selected=true]{color:var(--accent);border-bottom-color:var(--accent)}
+.field{margin:12px 0}.field>b{display:block;margin-bottom:4px}.hint{color:var(--sub);font-size:13px;margin:4px 0 0}
+input[type=file]{width:100%;padding:10px;border:1px dashed var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.how{margin:10px 0 0;font-size:14px}.how summary{font-weight:700;color:var(--accent)}.how ol{margin:6px 0 0;padding-left:1.4em;color:var(--sub)}
+.tiles{display:flex;gap:8px;overflow-x:auto;padding:4px 0}.tiles img{height:150px;width:auto;border:1px solid var(--line);border-radius:6px;cursor:zoom-in;background:#fff}
+dialog{border:0;padding:0;background:transparent;max-width:96vw}dialog::backdrop{background:rgba(0,0,0,.7)}dialog img{max-width:96vw;max-height:92vh}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Webサイト診断</h1>
+  <p class="lead">URLを入れると、事実にもとづく診断レポート(PDF)と、改善後のイメージ画像を作ります。</p>
+
+  <div class="card">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-url" aria-selected="true" type="button">URLで診断</button>
+      <button class="tab" role="tab" id="tab-up" aria-selected="false" type="button">資料を持ち込む(HTML + スクショ)</button>
+    </div>
+
+    <form id="form">
+      <div class="row">
+        <input type="text" id="url" inputmode="url" placeholder="https://example.com/" autocomplete="off" required>
+        <button class="primary" id="go" type="submit">診断する</button>
+      </div>
+      <label class="agree"><input type="checkbox" id="agree"> <span>診断するサイトは、自分のサイト、または診断の許可を得たサイトです。</span></label>
+      <ul class="notes">
+        <li>1回の診断に1〜2分かかります。同じサイトは30分以内に続けて診断できません(サイトに負担をかけないため)。</li>
+        <li>自動で診断できるのは、事実を確認できる項目です。『誰向けか』『強み』などの判断は、担当者が確認します。</li>
+        <li>ボット対策のあるサイトは診断できません(回避はしません)。その場合は『資料を持ち込む』をお使いください。</li>
+      </ul>
+    </form>
+
+    <form id="upform" hidden>
+      <div class="field"><b>① ページのHTMLファイル(必須)</b>
+        <input type="file" id="html" accept=".html,.htm,.txt,text/html">
+        <p class="hint">3MBまで。実行せず、文字として読み取るだけです。</p></div>
+      <div class="field"><b>② スクリーンショット(必須・複数可)</b>
+        <input type="file" id="shots" accept="image/png,image/jpeg,image/webp" multiple>
+        <p class="hint">PC幅とスマホ幅の両方を推奨。PNG・JPEG・WebP、8枚まで。縦長の画像は、自動で画面1枚分ずつに分けて確認します。</p>
+        <div id="kinds"></div></div>
+      <div class="field"><b>③ サイトのURL(任意)</b>
+        <input type="text" id="upurl" inputmode="url" placeholder="https://example.com/" autocomplete="off">
+        <p class="hint">レポートの表記と、相対リンクの解決に使います。アクセスはしません。</p></div>
+      <details class="how"><summary>撮り方・保存の仕方(Chrome の例)</summary>
+        <ol>
+          <li><b>HTML:</b> 診断したいページを開き、右クリック →『ページのソースを表示』→ すべて選択してコピーし、メモ帳で保存(拡張子 .html)。画面表示後にJavaScriptで作られるサイトは、F12 → Elements で一番上の &lt;html&gt; を右クリック →『Copy』→『Copy outerHTML』が確実です。</li>
+          <li><b>スクリーンショット(PC):</b> F12 を押し、Ctrl+Shift+P →『Capture full size screenshot』。<b>先に、ページを最後までスクロールして</b>、遅れて表示される部分を表示させてください(しないと白い空白で写ります)。</li>
+          <li><b>スクリーンショット(スマホ):</b> F12 → 左上のスマホ型のアイコン(デバイスツールバー)で iPhone などを選び、同じ手順で撮ります。</li>
+        </ol></details>
+      <label class="agree"><input type="checkbox" id="upagree"> <span>提供する資料は、自分のサイト、または診断の許可を得たサイトのものです。</span></label>
+      <div class="row" style="margin-top:12px"><button class="primary" id="upgo" type="submit">この資料で診断する</button></div>
+      <ul class="notes">
+        <li>サイトにはアクセスしません。ブラウザでの計測が必要な項目(ファーストビューのCTA・固定表示・色のコントラストなど)は判定せず、『未検証』と表示します。</li>
+        <li>資料の取得日時・取得元は、提供者の申告にもとづきます(真正性は確認できません)。</li>
+      </ul>
+    </form>
+  </div>
+
+  <div class="card" id="progress" hidden>
+    <b id="pmsg">準備しています</b>
+    <div class="bar"><i id="pbar"></i></div>
+  </div>
+  <div class="card err" id="error" hidden><h2 id="etitle">診断できませんでした</h2><p id="emsg"></p></div>
+
+  <div id="result" hidden>
+    <div class="card"><h2 id="rname"></h2><p style="margin:0 0 12px;color:var(--sub)" id="rmeta"></p>
+      <p class="summary" id="rsummary"></p><a class="dl" id="pdf" href="#">PDFをダウンロード</a></div>
+    <div class="card"><h2>診断スコアカード</h2><div class="grid" id="score"></div></div>
+    <div class="card"><h2>改善点(優先度順)</h2><div id="imps"></div><div id="minor"></div></div>
+    <div class="card"><h2>改善後のイメージ</h2>
+      <div class="banner">診断で見つかった点を、実際のページ上に仮に重ねた画像です。オレンジの枠が変更箇所です。実際の制作物・仕様ではありません。</div>
+      <div class="mock" id="mocks" style="margin-top:14px"></div></div>
+    <div class="card" id="tilebox" hidden><h2>取り込んだスクリーンショット(画面1枚分ずつ)</h2><div id="tiles"></div></div>
+    <div class="card"><h2>この診断で確認できていないこと</h2><ul class="plain" id="unv"></ul>
+      <h2 style="margin-top:14px">診断の方法</h2><p style="font-size:14px;color:var(--sub);margin:0" id="method"></p></div>
+  </div>
+</div>
+<dialog id="dlg"><img id="dimg" alt=""></dialog>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let timer = null;
+function mode(m){ const up = m === 'up'; $('form').hidden = up; $('upform').hidden = !up;
+  $('tab-url').setAttribute('aria-selected', String(!up)); $('tab-up').setAttribute('aria-selected', String(up)); reset(); }
+$('shots').onchange = () => { $('kinds').innerHTML = [...$('shots').files].map((f, i) => `<div class="row" style="align-items:center;margin-top:6px;font-size:14px"><span style="flex:1;min-width:160px;overflow:hidden;text-overflow:ellipsis">${esc(f.name)}</span><select data-kind="${i}" style="padding:6px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"><option value="auto">自動(幅で判定)</option><option value="pc">PC</option><option value="sp">スマホ</option></select></div>`).join(''); };
+$('tab-url').onclick = () => mode('url'); $('tab-up').onclick = () => mode('up');
+$('upform').addEventListener('submit', async (e) => {
+  e.preventDefault(); reset(); $('upgo').disabled = true;
+  const fd = new FormData();
+  if ($('html').files[0]) fd.append('html', $('html').files[0]);
+  [...$('shots').files].forEach((f, i) => { fd.append('shots', f); fd.append('kinds', (document.querySelector(`[data-kind="${i}"]`) || {}).value || 'auto'); });
+  fd.append('url', $('upurl').value); fd.append('agree', $('upagree').checked ? '1' : '0');
+  try {
+    const r = await fetch('/api/upload', {method:'POST', body: fd});
+    const j = await r.json();
+    if (!r.ok) { $('upgo').disabled = false; return fail('診断を始められません', j.error); }
+    $('progress').hidden = false; poll(j.job_id);
+  } catch (err) { $('upgo').disabled = false; fail('通信に失敗しました', 'サーバーに接続できません。起動しているか確認してください。'); }
+});
+
+$('form').addEventListener('submit', async (e) => {
+  e.preventDefault(); reset();
+  $('go').disabled = true;
+  try {
+    const r = await fetch('/api/diagnose', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({url: $('url').value, agree: $('agree').checked})});
+    const j = await r.json();
+    if (!r.ok) return fail('診断を始められません', j.error);
+    $('progress').hidden = false; poll(j.job_id);
+  } catch (err) { fail('通信に失敗しました', 'サーバーに接続できません。起動しているか確認してください。'); }
+});
+
+function reset(){ ['progress','error','result'].forEach(i => $(i).hidden = true); clearTimeout(timer); $('pbar').style.width = '0'; }
+function fail(t, m){ $('go').disabled = false; $('upgo').disabled = false; $('progress').hidden = true; $('etitle').textContent = t; $('emsg').textContent = m; $('error').hidden = false; }
+
+async function poll(id){
+  try {
+    const j = await (await fetch('/api/jobs/' + id)).json();
+    $('pmsg').textContent = j.message || '準備しています'; $('pbar').style.width = (j.progress || 0) + '%';
+    if (j.status === 'done') return show(j.report);
+    if (j.status === 'blocked') return fail('このサイトは自動診断できません', j.error + ' 回避はしていません。サイトの管理者に許可を得て、手動で確認してください。');
+    if (j.status === 'error') return fail('診断できませんでした', j.error);
+  } catch (e) {}
+  timer = setTimeout(() => poll(id), 2000);
+}
+
+function dots(n){ return '●'.repeat(n) + '○'.repeat(5 - n); }
+function show(r){
+  $('go').disabled = false; $('upgo').disabled = false; $('progress').hidden = true; $('result').hidden = false;
+  $('rname').textContent = r.site_name; $('rmeta').textContent = r.url + ' ・ ' + r.date;
+  $('rsummary').textContent = r.summary; $('pdf').href = r.pdf;
+  $('score').innerHTML = r.scorecard.map(c => `<div class="item"><b>${esc(c.item)}</b>${
+    c.score == null ? '<span class="todo">要確認(担当者が判断)</span>' : `<span class="dots">${dots(c.score)}</span> ${c.score}/5`}<p>${esc(c.comment)}</p></div>`).join('');
+  $('imps').innerHTML = r.improvements.map(i => `<details ${i.rank <= 3 ? 'open' : ''}><summary>${i.rank}. ${esc(i.title)}
+    <span class="chip ${i.impact === '高' ? 'hi' : ''}">効果 ${esc(i.impact)}</span><span class="chip">工数 ${esc(i.effort)}</span></summary>
+    <dl class="body"><dt>問題</dt><dd>${esc(i.issue)}</dd><dt>根拠</dt><dd>${esc(i.evidence)}</dd><dt>改善案</dt><dd>${esc(i.fix)}</dd></dl></details>`).join('')
+    || '<p>自動チェックの範囲では、改善点は見つかりませんでした。</p>';
+  $('minor').innerHTML = (r.minor || []).length ? '<h2 style="margin-top:14px">その他</h2><ul class="plain">' + r.minor.map(m => `<li>${esc(m)}</li>`).join('') + '</ul>' : '';
+  $('mocks').innerHTML = r.mockups.length ? r.mockups.map(m => `<h3 style="margin:0 0 6px;font-size:16px">${esc(m.title)}</h3>
+    <img src="${esc(m.image)}" alt="${esc(m.title)}の現状と改善イメージ" data-zoom><p>変更内容: ${m.changes.map(esc).join(' / ')}</p>`).join('')
+    : '<p style="color:var(--sub)">自動で重ねられる改善がなかったため、画像はありません。</p>';
+  $('tilebox').hidden = !(r.tiles && Object.keys(r.tiles).length);
+  $('tiles').innerHTML = Object.entries(r.tiles || {}).map(([v, ps]) => `<p class="hint">${v === 'sp' ? 'スマホ' : 'PC'}(${ps.length}枚)</p><div class="tiles">${ps.map(p => `<img src="${esc(p)}" alt="取り込んだ画像" data-zoom loading="lazy">`).join('')}</div>`).join('');
+  $('unv').innerHTML = r.unverified.map(u => `<li>${esc(u)}</li>`).join(''); $('method').textContent = r.method;
+  $('result').scrollIntoView({behavior:'smooth'});
+}
+document.addEventListener('click', (e) => { const t = e.target.closest('img[data-zoom]'); if (t) { $('dimg').src = t.src; $('dlg').showModal(); } else if (e.target.id === 'dlg' || e.target.id === 'dimg') $('dlg').close(); });
+</script>
+</body>
+</html>

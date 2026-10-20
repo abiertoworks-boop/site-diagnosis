@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>問い合わせに繋がる導線の見直し｜AIで作ったホームページを、プロの目で｜Abierto Works</title>
+<meta name="description" content="AIで作ったホームページの『問い合わせに繋がる導線』を見直します。簡易診断、診断レポート(PDF)、改善イメージ画像、1年間のサポート付き。3万円〜5万円。">
+<!-- 【公開前に】下の noindex を削除し、canonical と OGP 画像(og:image)を設定してください -->
+<meta name="robots" content="noindex">
+<meta property="og:title" content="問い合わせに繋がる導線の見直し｜AIで作ったホームページを、プロの目で">
+<meta property="og:description" content="AIで作ったホームページの導線を見直します。簡易診断・診断レポート・改善イメージ・1年サポート付き。">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314233b'/%3E%3Cpath d='M9 22l7-13 7 13' fill='none' stroke='%23fff' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+:root{
+  --ink:#14233b; --sub:#4a5568; --bg:#f6f8fb; --card:#ffffff; --line:#dbe3ee;
+  --brand:#14233b; --accent:#0b5cad; --cta:#b93a07; --cta-ink:#ffffff; --ok:#17683f; --warn:#8a5a00; --soft:#eaf1fb;
+  --todo-bg:#fff3bf; --todo-ink:#5f4700;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root{--ink:#e9eef7; --sub:#aab6c8; --bg:#0e1522; --card:#162033; --line:#2b3850; --brand:#e9eef7; --accent:#7db4ff; --cta:#d1470f; --soft:#1a2a45; --ok:#6fd3a0; --warn:#f0c36a; --todo-bg:#4a3d10; --todo-ink:#ffe9a6}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.85 "Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",system-ui,sans-serif;-webkit-text-size-adjust:100%;padding-bottom:84px}
+img,svg{max-width:100%}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:4px}
+.wrap{width:min(1040px,100% - 32px);margin-inline:auto}
+section{padding:64px 0}
+section:nth-of-type(even){background:var(--card)}
+h1,h2,h3{line-height:1.45;margin:0}
+h1{font-size:clamp(28px,5.2vw,44px);letter-spacing:.01em}
+h2{font-size:clamp(23px,3.6vw,31px);margin-bottom:12px}
+h3{font-size:18px;margin-bottom:6px}
+.eyebrow{display:inline-block;font-weight:700;font-size:14px;color:var(--accent);background:var(--soft);padding:4px 12px;border-radius:999px;margin:0 0 14px}
+.lead{font-size:clamp(16px,2.2vw,19px);color:var(--sub);max-width:42em}
+.btn{display:inline-block;padding:15px 26px;border-radius:999px;font-weight:700;text-decoration:none;border:2px solid transparent;font-size:16px;line-height:1.3;text-align:center}
+.btn.primary{background:var(--cta);color:var(--cta-ink)}
+.btn.ghost{border-color:var(--ink);color:var(--ink);background:transparent}
+.row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+header.site{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line)}
+header.site .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0}
+.logo{font-weight:800;letter-spacing:.04em;color:var(--brand);text-decoration:none}
+header.site .btn{padding:10px 18px;font-size:14px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+section:nth-of-type(even) .card{background:var(--bg)}
+.card p{margin:6px 0 0;color:var(--sub);font-size:15px}
+.num{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--brand);color:var(--bg);font-weight:800;margin-bottom:8px}
+ul.check{list-style:none;padding:0;margin:20px 0 0;display:grid;gap:10px}
+ul.check li{padding:12px 14px 12px 46px;border:1px solid var(--line);border-radius:10px;background:var(--card);position:relative}
+ul.check li::before{content:"✓";position:absolute;left:14px;top:11px;width:22px;height:22px;border-radius:50%;background:var(--warn);color:#fff;font-weight:800;text-align:center;line-height:22px;font-size:14px}
+.note{font-size:13px;color:var(--sub);margin-top:14px}
+.todo{background:var(--todo-bg);color:var(--todo-ink);padding:1px 6px;border-radius:4px;font-weight:700;font-size:.92em}
+.two{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:22px}
+.two h3{display:flex;gap:8px;align-items:center}
+.two ul{margin:8px 0 0;padding-left:1.2em;color:var(--sub);font-size:15px}
+.sec{border-left:6px solid var(--warn)}
+.src{font-size:13px;color:var(--sub);margin-top:14px;border-top:1px dashed var(--line);padding-top:10px}
+/* 簡易診断 */
+fieldset{border:1px solid var(--line);border-radius:12px;margin:0 0 14px;padding:14px 16px;background:var(--card)}
+legend{font-weight:700;padding:0 6px}
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.opts label{cursor:pointer}
+.opts input{position:absolute;opacity:0;pointer-events:none}
+.opts span{display:inline-block;padding:9px 18px;border:2px solid var(--line);border-radius:999px;font-weight:700;background:var(--bg)}
+.opts input:checked+span{border-color:var(--accent);background:var(--soft);color:var(--ink)}
+.opts input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
+#result{margin-top:18px}
+#result[hidden]{display:none}
+.meter{height:12px;background:var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.meter i{display:block;height:100%;background:var(--accent);width:0;transition:width .6s}
+.tier{font-size:22px;font-weight:800;margin:0}
+.fix{margin:10px 0 0;padding-left:1.3em}
+.fix li{margin:4px 0}
+/* 料金 */
+.price{font-size:clamp(30px,5vw,42px);font-weight:800;line-height:1.2;margin:8px 0}
+.price small{font-size:15px;font-weight:600;color:var(--sub)}
+.plan.main{border:2px solid var(--accent)}
+.plan ul{padding-left:1.2em;margin:10px 0 0;color:var(--sub);font-size:15px}
+details{border:1px solid var(--line);border-radius:12px;background:var(--card);margin:10px 0}
+details summary{cursor:pointer;padding:14px 16px;font-weight:700}
+details p{margin:0;padding:0 16px 14px;color:var(--sub);font-size:15px}
+/* フォーム */
+form.contact label{display:block;font-weight:700;margin:14px 0 4px}
+form.contact input[type=text],form.contact input[type=email],form.contact input[type=url],form.contact textarea{width:100%;padding:12px 14px;font:inherit;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+form.contact textarea{min-height:110px}
+.req{color:var(--cta);font-size:13px;margin-left:6px}
+.agree{display:flex;gap:10px;align-items:flex-start;margin:16px 0 0;font-size:14px;color:var(--sub);font-weight:400}
+.agree input{margin-top:6px}
+footer{padding:36px 0;background:var(--brand);color:var(--bg);font-size:14px}
+footer a{color:inherit}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;gap:8px;padding:10px 12px;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -2px 12px rgba(0,0,0,.12)}
+.bar a{flex:1;padding:13px 6px;font-size:15px}
+@media (min-width:860px){.bar{display:none}body{padding-bottom:0}}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="logo" href="#top">Abierto Works</a>
+    <a class="btn primary" href="#check">無料の簡易診断</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ① ヒーロー -->
+<section style="padding-top:48px">
+  <div class="wrap">
+    <p class="eyebrow">AIでホームページを作った方へ</p>
+    <h1>問い合わせに繋がる導線、<br>見直しませんか？</h1>
+    <p class="lead" style="margin-top:16px">AIを使えば、ホームページは短時間で作れます。けれど『問い合わせが来る形』にするには、知識と確認が要ります。作ったあとの導線を、プロの目で見直します。</p>
+    <div class="row">
+      <a class="btn primary" href="#check">3分でできる無料の簡易診断</a>
+      <a class="btn ghost" href="#contact">プロに相談する</a>
+    </div>
+    <p class="note">1年間のサポート付き 3万円〜5万円(<span class="todo">【要確認】税込/税別</span>)。診断結果は、画面とHTMLの事実にもとづいて根拠つきでお渡しします。</p>
+  </div>
+</section>
+
+<!-- ② 共感 -->
+<section aria-labelledby="h-pain">
+  <div class="wrap">
+    <h2 id="h-pain">AIで作れた。公開もした。でも、問い合わせが来ない。</h2>
+    <p class="lead">当社がホームページを診断したときに、実際に見つかった例です(業種・サイト名は伏せています)。</p>
+    <ul class="check">
+      <li>電話番号が画像になっていて、スマホからタップして発信できなかった</li>
+      <li>スマホで開くと、パソコン用の画面が縮小されて表示され、文字が小さかった</li>
+      <li>最初に開いた画面に、問い合わせ・予約のボタンが1つも見えなかった</li>
+      <li>料金や所要日数の目安が書かれておらず、問い合わせる前に比べられなかった</li>
+      <li>送信フォームの近くに、個人情報の扱いと、返信の目安が書かれていなかった</li>
+    </ul>
+    <p class="note">どれも、画面を整えるだけでは気づきにくく、直すと『問い合わせの手前で止まる理由』が減る点です。成果(問い合わせ数)を保証するものではありません。</p>
+  </div>
+</section>
+
+<!-- ③ AIで作れる → 知識がないと効果が出ない -->
+<section aria-labelledby="h-ai">
+  <div class="wrap">
+    <h2 id="h-ai">AIは、強い道具です。ただ、使いこなすには知識が要ります。</h2>
+    <p class="lead">『作れること』と『成果が出ること』は別です。AIが得意なことと、人の判断が要ることを分けて考えます。</p>
+    <div class="two">
+      <div class="card"><h3>AIが得意なこと</h3>
+        <ul><li>文章案・デザイン案を、すばやく出す</li><li>コードの下書きを作る</li><li>ページの見た目を、整える</li></ul></div>
+      <div class="card"><h3>人の判断が要ること</h3>
+        <ul><li>誰に、何を約束するサイトにするか</li><li>見る人が迷わず、問い合わせまで進める順路</li><li>個人情報・広告表現など、表示の確認</li><li>公開後の点検と更新を、誰が行うか</li></ul></div>
+    </div>
+    <div class="grid">
+      <div class="card"><span class="num">1</span><h3>『見た目』と『導線』は別</h3><p>整った画面でも、電話が押せない、ボタンが見えない、で止まります。順路を決めるのは、人です。</p></div>
+      <div class="card"><span class="num">2</span><h3>画面に出ない部分に差が出る</h3><p>タップできるか、スマホで読めるか、送信後に何が起こるか。見た目だけでは気づきにくい点です。</p></div>
+      <div class="card"><span class="num">3</span><h3>公開してからが本番</h3><p>フォームの迷惑メール対策、部品の更新、パスワード管理。公開後に誰が見るかを、先に決めておく必要があります。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ④ セキュリティ -->
+<section aria-labelledby="h-sec">
+  <div class="wrap">
+    <div class="card sec">
+      <h2 id="h-sec">公開するなら、セキュリティも確認を。</h2>
+      <p class="lead">AIが書いたコードにも、セキュリティ上の欠陥が含まれることがあります。専門知識がないまま公開すると、気づかないうちにお客様の情報や、ご自身の信用を危険にさらす場合があります。</p>
+      <h3 style="margin-top:18px">公開前に確認したい6項目</h3>
+      <ul class="check" style="margin-top:12px">
+        <li>https で配信されているか</li>
+        <li>問い合わせフォームの送信処理(入力の検証・迷惑メール対策)に問題がないか</li>
+        <li>管理画面・更新用のパスワードが守られているか</li>
+        <li>使っている部品・プラグインを、更新できる状態か</li>
+        <li>個人情報の取扱いが表示され、保管の方法が決まっているか</li>
+        <li>公開してはいけない情報(パスワード・APIキーなど)が混ざっていないか</li>
+      </ul>
+      <p class="src"><b>出典と、数字の読み方</b><br>
+      ・米Veracodeの調査(2025年7月30日発表): 80種類のコード作成課題で、100以上のAIモデルが生成したコードを分析し、<b>45%のケース</b>でセキュリティ上の欠陥が見つかったと報告されています。AIのコード生成を調べた一例で、ホームページ全体の安全性の割合ではありません。
+      <a href="https://www.veracode.com/press-release/ai-generated-code-poses-major-security-risks-in-nearly-half-of-all-development-tasks-veracode-research-reveals/" rel="noopener" target="_blank">Veracode のプレスリリース</a><br>
+      ・IPA(情報処理推進機構)は、ウェブサイトの開発者・運営者向けに、11種類の脆弱性と対策を解説した『安全なウェブサイトの作り方』(改訂第7版)を公開しています。
+      <a href="https://www.ipa.go.jp/security/vuln/websecurity/about.html" rel="noopener" target="_blank">IPA の解説ページ</a><br>
+      ・本サービスの確認は基本的な点検で、セキュリティを保証するものではありません。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ⑤ 簡易診断 -->
+<section id="check" aria-labelledby="h-check">
+  <div class="wrap">
+    <p class="eyebrow">無料・3分</p>
+    <h2 id="h-check">簡易診断: あなたのサイトの『問い合わせ導線』</h2>
+    <p class="lead">8つの質問に答えると、見直しの優先度と、確認したいポイントが分かります。自己申告にもとづく目安です(入力した内容は送信されません)。</p>
+    <form id="quiz" style="margin-top:22px" novalidate>
+      <fieldset><legend>Q1. スマホで自分のサイトを開いて、電話番号をタップして発信できますか？</legend>
+        <div class="opts"><label><input type="radio" name="q1" value="2"><span>はい</span></label><label><input type="radio" name="q1" value="1"><span>わからない</span></label><label><input type="radio" name="q1" value="0"><span>いいえ</span></label></div></fieldset>
+      <fieldset><legend>Q2. 最初の画面(スクロールする前)に、問い合わせ・予約・電話のボタンが見えますか？</legend>
+        <div class="opts"><label><input type="radio" name="q2" value="2"><span>はい</span></label><label><input type="radio" name="q2" value="1"><span>わからない</span></label><label><input type="radio" name="q2" value="0"><span>いいえ</span></label></div></fieldset>
+      <fieldset><legend>Q3. 料金(または見積りの流れ)の目安が書かれていますか？</legend>
+        <div class="opts"><label><input type="radio" name="q3" value="2"><span>はい</span></label><label><input type="radio" name="q3" value="1"><span>わからない</span></label><label><input type="radio" name="q3" value="0"><span>いいえ</span></label></div></fieldset>
+      <fieldset><legend>Q4. よくある質問(FAQ)のページ、または項目がありますか？</legend>
+        <div class="opts"><label><input type="radio" name="q4" value="2"><span>はい</span></label><label><input type="radio" name="q4" value="1"><span>わからない</span></label><label><input type="radio" name="q4" value="0"><span>いいえ</span></label></div></fieldset>
+      <fieldset><legend>Q5. お客様の声・実績など、第三者の安心材料が載っていますか？</legend>
+        <div class="opts"><label><input type="radio" name="q5" value="2"><span>はい</span></label><label><input type="radio" name="q5" value="1"><span>わからない</span></label><label><input type="radio" name="q5" value="0"><span>いいえ</span></label></div></fieldset>
+      <fieldset><legend>Q6. 問い合わせフォームの近くに、個人情報の取扱いへのリンクと、返信の目安がありますか？</legend>
+        <div class="opts"><label><input type="radio" name="q6" value="2"><span>はい</span></label><label><input type="radio" name="q6" value="1"><span>わからない</span></label><label><input type="radio" name="q6" value="0"><span>いいえ</span></label></div></fieldset>
+      <fieldset><legend>Q7. 問い合わせフォームの入力項目は、5つ以内ですか？</legend>
+        <div class="opts"><label><input type="radio" name="q7" value="2"><span>はい</span></label><label><input type="radio" name="q7" value="1"><span>わからない</span></label><label><input type="radio" name="q7" value="0"><span>いいえ</span></label></div></fieldset>
+      <fieldset><legend>Q8. 公開後の点検・更新(部品の更新、パスワード管理など)を、誰が行うか決まっていますか？</legend>
+        <div class="opts"><label><input type="radio" name="q8" value="2"><span>はい</span></label><label><input type="radio" name="q8" value="1"><span>わからない</span></label><label><input type="radio" name="q8" value="0"><span>いいえ</span></label></div></fieldset>
+      <button class="btn primary" type="submit">結果を見る</button>
+      <p id="quizerr" role="alert" class="note" style="color:var(--cta)" hidden>未回答の質問があります。すべてに答えてください。</p>
+    </form>
+    <div id="result" class="card" hidden aria-live="polite">
+      <p class="tier" id="tier"></p>
+      <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+      <p id="tiertext" style="margin:0;color:var(--sub)"></p>
+      <h3 style="margin-top:16px">確認したいポイント</h3>
+      <ul class="fix" id="fixes"></ul>
+      <div class="row"><a class="btn primary" href="#contact">この結果をもとに相談する</a></div>
+      <p class="note">自己申告にもとづく目安です。実際のサイトは、画面とHTMLを確認して診断します。成果を保証するものではありません。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ⑥ サービス内容 -->
+<section aria-labelledby="h-flow">
+  <div class="wrap">
+    <h2 id="h-flow">お任せいただく流れ</h2>
+    <p class="lead">画面とHTMLの事実にもとづいて診断し、優先順位をつけて直します。公開後も、1年間サポートします。</p>
+    <div class="grid">
+      <div class="card"><span class="num">1</span><h3>現状の診断</h3><p>PC・スマホの画面とHTMLを確認し、問い合わせまでの順路を点検します。診断レポート(PDF)をお渡しします。</p></div>
+      <div class="card"><span class="num">2</span><h3>見直し案の提示</h3><p>改善後のイメージ画像つきで、優先順位をつけてご提案します。</p></div>
+      <div class="card"><span class="num">3</span><h3>導線の改善</h3><p>電話・ボタン・フォーム・表示などを改善します。<span class="todo">【要確認】改善の対象範囲(ページ数・修正箇所の上限)</span></p></div>
+      <div class="card"><span class="num">4</span><h3>1年間のサポート</h3><p>公開後の質問・軽微な修正に対応します。<span class="todo">【要確認】サポート範囲(修正の回数・対応時間・連絡手段)</span></p></div>
+    </div>
+    <p class="note">基本的なセキュリティの確認(前の項目の6点)も含みます。<span class="todo">【要確認】確認の範囲</span> 保証を行うものではありません。</p>
+  </div>
+</section>
+
+<!-- ⑦ 料金 -->
+<section aria-labelledby="h-price">
+  <div class="wrap">
+    <h2 id="h-price">料金</h2>
+    <p class="lead">ご相談の内容に合わせて、ご提案前にお見積りを出します。<span class="todo">【要確認】金額を決める基準(ページ数・改善の範囲など)</span></p>
+    <div class="grid">
+      <div class="card plan main"><p class="eyebrow">導線の見直し</p>
+        <p class="price">3万円〜5万円 <small>(1年間のサポート付き)</small></p>
+        <p><span class="todo">【要確認】税込/税別</span></p>
+        <ul><li>現状の診断(診断レポート PDF)</li><li>改善後のイメージ画像</li><li>導線の改善</li><li>公開後1年間のサポート</li></ul></div>
+      <div class="card plan"><p class="eyebrow">オプション</p>
+        <p class="price">＋5万円 <small>(別途)</small></p>
+        <p><b>診断ページの導入</b><br>あなたのサイトに、お客様が答えると結果が分かる『診断ページ』を設置します。上の簡易診断は、その一例です。</p>
+        <ul><li>質問・結果の文面づくり</li><li>サイトへの設置</li></ul>
+        <p class="note"><span class="todo">【要確認】設問数・結果の種類・設置範囲</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑧ 向き不向き -->
+<section aria-labelledby="h-fit">
+  <div class="wrap">
+    <h2 id="h-fit">こんな方に向いています</h2>
+    <div class="two">
+      <div class="card"><h3>向いている方</h3><ul><li>AIでホームページを作った(作りたい)</li><li>公開したが、問い合わせが少ない・止まっていると感じる</li><li>自分で直したいが、どこから手を付けるか分からない</li><li>公開後の点検・更新を、相談できる人がほしい</li></ul></div>
+      <div class="card"><h3>向いていない方</h3><ul><li>問い合わせ数・売上の保証がほしい(保証はできません)</li><li>大規模なシステム開発・ECサイトの全面構築が必要<span class="todo">【要確認】対応範囲</span></li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑨ FAQ -->
+<section aria-labelledby="h-faq">
+  <div class="wrap">
+    <h2 id="h-faq">よくある質問</h2>
+    <details><summary>AIで作ったままでも、問題ありませんか？</summary><p>一概には言えません。見た目に問題がなくても、電話がタップできない、フォームの案内が足りない、などで問い合わせを逃している場合があります。まずは簡易診断で確認してください。</p></details>
+    <details><summary>どんなサイトでも対応できますか？</summary><p><span class="todo">【要確認】対応できる作り(WordPress・Wix・手作りHTML・ノーコード等)と、できない場合</span></p></details>
+    <details><summary>3万円と5万円の違いは何ですか？</summary><p><span class="todo">【要確認】金額を決める基準</span>お見積りの段階で、内訳をご説明します。</p></details>
+    <details><summary>問い合わせが増えると約束できますか？</summary><p>約束はできません。公開されている画面とHTMLの事実にもとづいて、問い合わせの手前で止まる理由を減らす提案をします。</p></details>
+    <details><summary>診断のために、サイトの中身を預けますか？</summary><p>公開されているページを確認します。ボット対策などで取得できない場合は、HTMLとスクリーンショットをお預かりして診断します。お預かりした資料は、診断のために使い、<span class="todo">【要確認】保管期間・削除の方法</span></p></details>
+    <details><summary>『診断ページの導入』とは何ですか？</summary><p>あなたのサイトに、質問に答えると結果が分かる診断ページを設置するオプションです。お客様の関心を知り、相談につなげる使い方ができます。</p></details>
+  </div>
+</section>
+
+<!-- ⑩ 問い合わせ -->
+<section id="contact" aria-labelledby="h-contact">
+  <div class="wrap">
+    <h2 id="h-contact">ご相談はこちら</h2>
+    <p class="lead">サイトのURLを教えてください。まずは現状を確認します。通常、<span class="todo">【要確認】◯営業日以内</span>にご返信します。</p>
+    <form class="contact card" id="contactForm" method="post" action="#" style="margin-top:20px">
+      <!-- 【接続】action に、フォームの送信先(Jotform・フォーム送信サービス・自社サーバーなど)を設定してください -->
+      <label for="c-name">お名前<span class="req">必須</span></label>
+      <input type="text" id="c-name" name="name" autocomplete="name" required>
+      <label for="c-mail">メールアドレス<span class="req">必須</span></label>
+      <input type="email" id="c-mail" name="email" autocomplete="email" required>
+      <label for="c-url">サイトのURL(任意)</label>
+      <input type="url" id="c-url" name="url" placeholder="https://" autocomplete="url">
+      <label for="c-body">ご相談内容(任意)</label>
+      <textarea id="c-body" name="message"></textarea>
+      <label class="agree"><input type="checkbox" name="agree" required><span><a href="#privacy">個人情報の取扱い</a>に同意して送信します。</span></label>
+      <div class="row"><button class="btn primary" type="submit">相談する</button></div>
+      <p class="note">お預かりした個人情報は、ご返信とご提案のためにのみ使います。</p>
+    </form>
+    <p class="note" id="formnote" hidden>これは、ひな型のフォームです。送信先を設定するまで、送信はされません。</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p style="margin:0 0 8px"><b>Abierto Works</b>　<span class="todo">【要確認】屋号・代表者・所在地・連絡先</span></p>
+    <p style="margin:0 0 8px"><a href="#privacy">プライバシーポリシー</a>　<a href="#tokushoho">特定商取引法に基づく表記</a></p>
+    <p id="privacy" style="margin:0 0 8px"><span class="todo">【要確認】プライバシーポリシー(利用目的・第三者提供・開示等の請求・問い合わせ先)。専門家の確認を推奨</span></p>
+    <p id="tokushoho" style="margin:0 0 8px"><span class="todo">【要確認】特定商取引法に基づく表記(事業者名・所在地・連絡先・料金・支払方法・提供時期・返品の扱い)。必要かを含め、専門家に確認</span></p>
+    <p style="margin:0">© 2026 Abierto Works</p>
+  </div>
+</footer>
+
+<nav class="bar" aria-label="固定メニュー">
+  <a class="btn ghost" href="#check">簡易診断</a>
+  <a class="btn primary" href="#contact">相談する</a>
+</nav>
+
+<script>
+(function(){
+  var FIX = {
+    q1:'電話番号を、画像ではなく文字にして、タップで発信できるリンクにします。',
+    q2:'最初の画面に、問い合わせ・予約・電話のボタンを1つ置きます。',
+    q3:'料金の目安、または見積りの流れを書きます(実際の運用に合わせて)。',
+    q4:'よくある質問を5〜10問、作ります。',
+    q5:'お客様の声・実績など、第三者の安心材料を載せます(許可を得た範囲で)。',
+    q6:'フォームの近くに、個人情報の取扱いへのリンクと、返信の目安を置きます。',
+    q7:'フォームの入力項目を減らします(最初の連絡に必須でないものは任意に)。',
+    q8:'公開後の点検・更新(部品の更新、パスワード管理など)の担当を決めます。'
+  };
+  var TIERS = [
+    {max:6,  name:'見直しの優先度: 高', text:'問い合わせの手前で止まっている可能性があります。まず、下の確認ポイントから見直すと効果的です。'},
+    {max:11, name:'見直しの優先度: 中', text:'基本は整っています。下の確認ポイントを直すと、問い合わせまでの順路がさらに分かりやすくなります。'},
+    {max:16, name:'見直しの優先度: 低', text:'導線の基本は整っています。細部の改善と、公開後の点検を続けましょう。'}
+  ];
+  var form = document.getElementById('quiz');
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var total = 0, todo = [], missing = false;
+    for (var i = 1; i <= 8; i++) {
+      var picked = form.querySelector('input[name="q'+i+'"]:checked');
+      if (!picked) { missing = true; continue; }
+      var v = parseInt(picked.value, 10); total += v;
+      if (v < 2) todo.push(FIX['q'+i] + (v === 1 ? '(まず、現状を確認してください)' : ''));
+    }
+    document.getElementById('quizerr').hidden = !missing;
+    if (missing) return;
+    var tier = TIERS.filter(function(t){ return total <= t.max; })[0];
+    document.getElementById('tier').textContent = tier.name + '(' + total + ' / 16点)';
+    document.getElementById('tiertext').textContent = tier.text;
+    document.getElementById('meter').style.width = Math.round(total / 16 * 100) + '%';
+    var ul = document.getElementById('fixes'); ul.innerHTML = '';
+    (todo.length ? todo : ['大きな見直しポイントは、回答からは見つかりませんでした。']).forEach(function(t){ var li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+    var r = document.getElementById('result'); r.hidden = false; r.scrollIntoView({behavior:'smooth', block:'nearest'});
+  });
+  // ひな型のフォーム: 送信先が未設定の間は、送信せずに案内を出す
+  var cf = document.getElementById('contactForm');
+  cf.addEventListener('submit', function(e){ if (cf.getAttribute('action') === '#') { e.preventDefault(); document.getElementById('formnote').hidden = false; } });
+})();
+</script>
+</body>
+</html>
