@@ -88,7 +88,8 @@ MEASURE_JS = r"""
     .filter(e => { const r = e.getBoundingClientRect(); return r.width < 24 || r.height < 24; }).length;
   const h1 = [...document.querySelectorAll('h1')].map(h => (h.innerText || (h.querySelector('img') || {}).alt || '').trim());
   return {fvCtas, fvButtons, boxes, hero, phones: [...new Set(phones)], telLinks, smallTargets: small, h1,
-    overflowX: document.documentElement.scrollWidth > innerWidth + 1, vw: innerWidth, vh: innerHeight};
+    overflowX: document.documentElement.scrollWidth > innerWidth + 1, vw: innerWidth, vh: innerHeight,
+    textLen: (document.body.innerText || '').length};
 }
 """
 

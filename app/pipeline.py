@@ -31,6 +31,7 @@ UNVERIFIED = [
     "『誰向けか』『強み』『ベネフィット』『導線』『ファーストビュー』の評価(担当者が画面を見て判断する項目)",
     "表示速度・Core Web Vitals(未計測)",
     "検索順位・検索需要・アクセス数・離脱率・問い合わせ数・売上(解析データが必要)",
+    "AI(ChatGPT・Gemini・Claude など)での実際の引用・表示(外部サービスの結果は日々変わるため、未計測)",
     "Google ビジネスプロフィール・口コミ(サイト外の情報)",
     "フォーム送信後の動作(送信は行っていない)",
     "法令への適合(広告表現・個人情報・特定商取引法など。専門家の確認が必要)",
@@ -147,6 +148,7 @@ def run_job(job_dir, url, progress):
     top = fetch_page(url)
     site = {"url": top["url"], "pages": [top], "links": top["facts"]["links"]}
     top["fetch"]["side_files"] = collect.side_files(top["url"])
+    site["robots_txt"], site["llms_txt"] = collect.text_file(top["url"], "/robots.txt"), collect.text_file(top["url"], "/llms.txt")
     subs = pick_subpages(top["url"], site["links"])
     notes = []
     for i, u in enumerate(subs):
@@ -161,8 +163,10 @@ def run_job(job_dir, url, progress):
         site["cap"] = session.measure_all()
         progress(65, "自動チェックをしています")
         findings, plan, scores, signals = checks.run(site)
-        progress(72, "改善イメージを作っています")
-        mocks = mockup.make_mockups(session, plan)
+        mocks = []  # 改善後のイメージ画像は既定でオフ(SD_MOCKUPS=1 で有効)
+        if os.environ.get("SD_MOCKUPS") == "1":
+            progress(72, "改善イメージを作っています")
+            mocks = mockup.make_mockups(session, plan)
     images = {"pc": f"{job_dir}/pc_fv.png", "sp": f"{job_dir}/sp_fv.png"}
     progress(88, "PDFを作っています")
     rep = build_report(site, findings, plan, scores, signals, mocks, images, notes)

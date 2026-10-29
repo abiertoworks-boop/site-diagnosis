@@ -8,9 +8,9 @@ from urllib.parse import urljoin
 
 IMPACT = {"高": 3, "中": 2, "低": 1}
 EFFORT = {"小": 1, "中": 2, "大": 3}
-AUTO_ITEMS = ["CTA", "信頼性", "スマホ表示", "SEO", "問い合わせまでの流れ"]
+AUTO_ITEMS = ["CTA", "信頼性", "スマホ表示", "SEO", "LLMO", "問い合わせまでの流れ"]
 ALL_ITEMS = ["ファーストビュー", "誰向けか", "強み", "ベネフィット", "CTA", "信頼性",
-             "導線", "スマホ表示", "SEO", "問い合わせまでの流れ"]
+             "導線", "スマホ表示", "SEO", "LLMO", "問い合わせまでの流れ"]
 CTA_PRIORITY = ["資料請求", "見学", "予約", "無料相談", "相談", "体験", "お問い合わせ", "お問合せ", "問い合わせ", "メール", "contact"]
 JP = re.compile("[぀-ヿ一-鿿]")
 
@@ -31,6 +31,100 @@ def pick_cta(top_url, links):
         if re.search(r"contact|inquiry|toiawase|enquiry|form", href, re.I) and not href.startswith(("tel:", "mailto:", "javascript:")):
             return {"label": l["text"][:16] or "お問い合わせ", "url": urljoin(top_url, href)}
     return None
+
+
+# ---- LLMO(AI検索・AIによる要約への対応) ----
+# 根拠(公式ページで確認): Google の『AI機能とサイト』は、AI Overviews/AI Mode に出るための追加の要件や特別な最適化は不要とし、
+# 検索の基本(技術要件・ポリシー・基本のSEO)を挙げている。OpenAI は OAI-SearchBot(検索)・GPTBot(学習)・ChatGPT-User(利用者の操作)を、
+# Anthropic は ClaudeBot(学習)・Claude-SearchBot(検索)・Claude-User(利用者の操作)を、robots.txt で別々に制御できると説明している。
+# よって、ここでは『特別な裏技』ではなく、機械が読み取れる状態か(止めていないか・文字で読めるか・構造化されているか)だけを確認する。
+AI_SEARCH_BOTS = ["OAI-SearchBot", "Claude-SearchBot", "ChatGPT-User", "Claude-User"]   # 止めると、AIの回答・検索に出にくくなる(各社の説明)
+AI_TRAIN_BOTS = ["GPTBot", "ClaudeBot", "Google-Extended"]                                 # 学習用。止めるかは事業者の方針
+
+
+def parse_robots(text):
+    groups, agents, rules, last_was_agent = [], [], [], False
+    for raw in (text or "").splitlines():
+        line = raw.split("#", 1)[0].strip()
+        if ":" not in line:
+            continue
+        k, v = (x.strip() for x in line.split(":", 1))
+        k = k.lower()
+        if k == "user-agent":
+            if not last_was_agent and agents:
+                groups.append((agents, rules)); agents, rules = [], []
+            agents.append(v.lower()); last_was_agent = True
+        elif k in ("allow", "disallow"):
+            rules.append((k, v)); last_was_agent = False
+    if agents:
+        groups.append((agents, rules))
+    return groups
+
+
+def bot_blocked(groups, bot):
+    """そのボットに『サイト全体を禁止』が適用されるか(固有の指定を優先し、なければ * に従う)。"""
+    def full_block(rules):
+        dis = any(k == "disallow" and v == "/" for k, v in rules)
+        allow = any(k == "allow" and v == "/" for k, v in rules)
+        return dis and not allow
+    for agents, rules in groups:
+        if bot.lower() in agents:
+            return full_block(rules)
+    for agents, rules in groups:
+        if "*" in agents:
+            return full_block(rules)
+    return False
+
+
+def llmo_findings(site, pages, text_all, tf, live):
+    out = []
+    robots = site.get("robots_txt")
+    if robots is not None:
+        g = parse_robots(robots)
+        blocked_s = [b for b in AI_SEARCH_BOTS if bot_blocked(g, b)]
+        blocked_t = [b for b in AI_TRAIN_BOTS if bot_blocked(g, b)]
+        if blocked_s:
+            out.append(finding("llmo_bots", "LLMO", "AI検索・AIの閲覧用ボットを、robots.txt で止めていないか確認する", "止めていると、AIの回答や検索に、サイトの情報が出にくくなる(各社の説明)。",
+                               "robots.txt で、サイト全体が禁止されているボット: " + "、".join(blocked_s), "AIの回答に出したい場合は、検索用・利用者の操作用のボットを許可する。学習用ボットの扱いは、別に決められる(OpenAI・Anthropic の公式説明)。", "中", "小", 1.5))
+        if blocked_t:
+            out.append(finding("llmo_train", "LLMO", "AIの学習用ボットの扱いを、方針として確認する", "止める・許可するは事業者の方針。意図したものかの確認。",
+                               "robots.txt で、サイト全体が禁止されている学習用ボット: " + "、".join(blocked_t), "意図した設定であれば、変更は不要。", "低", "小", 0))
+    sd = tf.get("structured_data") or []
+    if not sd:
+        out.append(finding("llmo_ld", "LLMO", "構造化データ(JSON-LD)で、事業者情報を機械が読める形にする", "名称・住所・電話・営業時間などが、文章を読み解かなくても取り出せる形になっていない。",
+                           "トップページに構造化データがない。", "LocalBusiness(または Organization)に、名称・住所・電話・営業時間・サービス内容を入れる。表示される内容と一致させる。検索結果の表示への効果は保証されない。", "低", "小", 1))
+    else:
+        biz = [d for d in sd if d.get("type") and any(t in str(d["type"]) for t in ("LocalBusiness", "Organization", "Store", "Service"))]
+        issues = []
+        for d in biz:
+            if d.get("address_empty"):
+                issues.append("住所(address)が空")
+            if "openingHours" not in d["keys"] and "openingHoursSpecification" not in d["keys"] and "LocalBusiness" in str(d["type"]):
+                issues.append("営業時間なし")
+            if "sameAs" not in d["keys"]:
+                issues.append("公式SNS等への関連付け(sameAs)なし")
+        if issues:
+            out.append(finding("llmo_ld2", "LLMO", "構造化データの中身を充実させる", "項目が空・不足していると、機械が事業者情報を正確に取り出せない。",
+                               "トップの構造化データ(" + "、".join(sorted({str(d['type']) for d in biz})) + ")の不足: " + "、".join(dict.fromkeys(issues)), "住所(都道府県・市区町村・番地・郵便番号)・営業時間・sameAs(公式SNS・グループのサイト)などを補う。", "低", "小", 1))
+    nap_phone = bool(re.search(r"0\d{1,4}[-ー－‐]\d{1,4}[-ー－‐]\d{3,4}", text_all))
+    nap_addr = bool(re.search(r"(北海道|東京都|大阪府|京都府|.{2,3}県).{1,8}[市区町村郡]", text_all)) or "〒" in text_all
+    nap_hours = bool(re.search(r"営業時間|受付時間|営業日", text_all))
+    miss = [n for n, ok in (("電話番号", nap_phone), ("住所", nap_addr), ("営業時間・営業日", nap_hours)) if not ok]
+    if miss:
+        out.append(finding("llmo_nap", "LLMO", "事業者の基本情報を、文字で、まとまった場所に書く", "AIや検索が、事業者の名称・所在地・連絡先・営業時間を文章として引用できない。画像の中の文字は読み取れない場合がある。",
+                           "取得したページの本文(文字)で確認できなかった項目: " + "、".join(miss), "会社概要またはお問い合わせページに、名称・住所・電話・営業時間を文字で書く(画像にしない)。", "中", "小", 1.5))
+    has_date = bool(re.search(r"(更新日|最終更新|掲載日|公開日|Updated|令和\d+年度|20\d\d年\d{1,2}月)", text_all))
+    if not has_date:
+        out.append(finding("llmo_fresh", "LLMO", "情報の鮮度(日付・年度)を、文字で示す", "料金・実績などの数字に日付・年度がないと、AIが古い情報を最新として引用する恐れがある。",
+                           "取得したページの本文に、更新日・年度・年月の記載を確認できなかった。", "数値や実績には『令和◯年度』『◯年◯月時点』を添え、ページに更新日を載せる。", "低", "小", 1))
+    # 表示後に作られる本文が多いか(HTMLだけでは読めない内容)
+    if live:
+        raw = tf["text"]["chars"]
+        rendered = max((site["cap"][v].get("textLen") or 0) for v in ("pc", "sp"))
+        if raw and rendered > raw * 1.5 and rendered - raw > 800:
+            out.append(finding("llmo_js", "LLMO", "本文が、表示後にJavaScriptで作られていないか確認する", "HTMLの時点で文字がないと、読み取れないボットや読み上げがある。",
+                               f"HTMLの文字数は約{raw}、表示後は約{rendered}。", "重要な本文は、HTMLに最初から入る作り(サーバー側での出力)にする。", "中", "中", 1.5))
+    return out
 
 
 def run(site, live=True):
@@ -146,9 +240,11 @@ def run(site, live=True):
         out.append(finding("nocta", "CTA", "問い合わせ・予約への入口を、メニューに明示する", "次の一歩が分からず、離脱しやすい。",
                            "トップページのリンクに、問い合わせ・予約・資料請求などの文言を確認できなかった。", "ヘッダーに『お問い合わせ』などのボタンを常設する。", "高", "小", 2))
 
+    out += llmo_findings(site, pages, text_all, tf, live)
+
     # ---- スコア ----
     scores = {}
-    scored = AUTO_ITEMS if live else ["信頼性", "SEO", "問い合わせまでの流れ"]  # 持ち込みでは、画面の計測が要る項目は採点しない
+    scored = AUTO_ITEMS if live else ["信頼性", "SEO", "LLMO", "問い合わせまでの流れ"]  # 持ち込みでは、画面の計測が要る項目は採点しない
     for item in AUTO_ITEMS:
         pen = sum(f["weight"] for f in out if f["item"] == item)
         scores[item] = max(1, min(5, round(5 - pen))) if item in scored else None

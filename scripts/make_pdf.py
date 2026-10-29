@@ -15,6 +15,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.graphics.shapes import Drawing, Line, Polygon, String
 from reportlab.platypus import (Image, KeepTogether, PageBreak, Paragraph,
                                 SimpleDocTemplate, Spacer, Table, TableStyle)
 
@@ -116,6 +117,59 @@ def fv_images(imgs, W, who):
     return [Spacer(1, 6), t]
 
 
+def radar(items, compare=None, size=300):
+    """項目名と点数(1〜5)のレーダーチャート。items=[(名前, 点数)]、compare=(名前, {項目: 点数})。"""
+    import math
+    n = len(items)
+    d = Drawing(size + 160, size + 40)
+    cx, cy, rad = (size + 160) / 2, size / 2 + 20, size / 2 - 28
+
+    def pt(i, v):
+        a = math.pi / 2 - 2 * math.pi * i / n
+        return cx + rad * v / 5 * math.cos(a), cy + rad * v / 5 * math.sin(a)
+    for lv in range(1, 6):
+        pts = [c for i in range(n) for c in pt(i, lv)]
+        d.add(Polygon(pts, strokeColor=colors.HexColor("#c9d3e6"), strokeWidth=0.5, fillColor=None))
+        d.add(String(cx + 2, cy + rad * lv / 5 - 3, str(lv), fontName="JP", fontSize=6, fillColor=GRAY))
+    for i, (name, _) in enumerate(items):
+        x, y = pt(i, 5)
+        d.add(Line(cx, cy, x, y, strokeColor=colors.HexColor("#c9d3e6"), strokeWidth=0.4))
+        lx, ly = pt(i, 5.9)
+        anchor = "middle" if abs(lx - cx) < 12 else ("start" if lx > cx else "end")
+        d.add(String(lx, ly - 3, name, fontName="JP", fontSize=7.5, fillColor=NAVY, textAnchor=anchor))
+    if compare:
+        pts = [c for i, (name, _) in enumerate(items) for c in pt(i, compare[1].get(name, 0))]
+        d.add(Polygon(pts, strokeColor=colors.HexColor("#e07b00"), strokeWidth=1.2, fillColor=None, strokeDashArray=[3, 2]))
+    pts = [c for i, (_, v) in enumerate(items) for c in pt(i, v)]
+    d.add(Polygon(pts, strokeColor=ACCENT, strokeWidth=1.6, fillColor=colors.Color(0.16, 0.43, 0.96, alpha=0.2)))
+    for i, (_, v) in enumerate(items):
+        x, y = pt(i, v)
+        d.add(String(x, y - 2.5, "●", fontName="JP", fontSize=6, fillColor=ACCENT, textAnchor="middle"))
+    return d
+
+
+def rubric_section(W, scored):
+    import rubric
+    s = [PageBreak(), P("点数の見方(採点基準)", H1),
+         P("この基準は、本診断ツールの診断者の定義です。統計や公的な基準ではありません。", SMALL), Spacer(1, 4)]
+    rows = [[P("点数", CELLB), P("意味", CELLB), P("対応の目安", CELLB)]]
+    rows += [[P(a, CELL), P(b, CELL), P(c, CELL)] for a, b, c in rubric.SCALE]
+    t = Table(rows, colWidths=[W * 0.1, W * 0.25, W * 0.65], repeatRows=1)
+    t.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, 0), LIGHT), ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                           ("LINEBELOW", (0, 0), (-1, -1), 0.3, colors.HexColor("#dfe6f2"))]))
+    s += [t, Spacer(1, 6)] + [P("・" + x, BODY) for x in rubric.NOTES] + [Spacer(1, 6), P("項目ごとの目安", H2)]
+    rows = [[P("項目", CELLB), P("5点の状態", CELLB), P("3点の状態", CELLB), P("1点の状態", CELLB)]]
+    for name, (a, b, c) in rubric.ITEMS.items():
+        mark = "★ " if name in scored else ""
+        rows.append([P(mark + name, CELL), P(a, CELL), P(b, CELL), P(c, CELL)])
+    t = Table(rows, colWidths=[W * 0.15, W * 0.31, W * 0.27, W * 0.27], repeatRows=1)
+    t.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, 0), LIGHT), ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                           ("LINEBELOW", (0, 0), (-1, -1), 0.3, colors.HexColor("#dfe6f2")),
+                           ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]))
+    s += [t, P("★ = 今回採点した項目", SMALL)]
+    return s
+
+
 def build(rep, out):
     doc = SimpleDocTemplate(out, pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm,
                             topMargin=16 * mm, bottomMargin=18 * mm,
@@ -130,6 +184,15 @@ def build(rep, out):
           Spacer(1, 6), P("総評", H2), P(rep["summary"])]
 
     s += fv_images(rep.get("images"), W, "診断対象")
+
+    # レーダーチャート(採点した項目のみ)
+    scored = [(r["item"], r["score"]) for r in rep["scorecard"] if r["score"] is not None]
+    if len(scored) >= 3:
+        cmp_ = rep.get("radar_compare")
+        s += [KeepTogether([P("スコアのレーダーチャート", H2),
+                            radar(scored, (cmp_["name"], cmp_["scores"]) if cmp_ else None),
+                            P("外側ほど良好(5点)、内側ほど要対応(1点)。点数の意味は巻末『点数の見方』を参照。"
+                              + (f"　橙の点線=" + esc(cmp_["name"]) if cmp_ else ""), SMALL)])]
 
     # スコアカード
     s += [P("診断スコアカード(5点満点)", H2)]
@@ -212,6 +275,7 @@ def build(rep, out):
     s += [P("・" + u, BODY) for u in rep["unverified"]]
     s += [P("診断の方法", H2), P(rep["method"], BODY), Spacer(1, 8),
           P("本レポートは公開されている情報に基づく診断であり、売上・集客などの成果を保証するものではありません。", SMALL)]
+    s += rubric_section(W, {n for n, _ in scored})
     doc.build(s, onFirstPage=page_footer, onLaterPages=page_footer)
 
 

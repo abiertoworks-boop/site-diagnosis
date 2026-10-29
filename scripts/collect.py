@@ -111,6 +111,17 @@ def load(target):
     return html, meta
 
 
+def text_file(base, path, limit=20000):
+    """robots.txt や llms.txt の本文(取得できなければ None)。"""
+    try:
+        u = urljoin(base, path)
+        guard_url(u)
+        r = requests.get(u, headers={"User-Agent": UA}, timeout=10)
+        return r.text[:limit] if r.status_code == 200 and "text" in r.headers.get("content-type", "text") else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def side_files(base):
     out = {}
     for path in SEC_FILES:
@@ -172,16 +183,22 @@ def extract(html, base):
         "twitter_card": meta_of(name="twitter:card"),
         "favicon": bool(soup.find("link", rel=re.compile("icon", re.I))),
     }
-    ld_types = []
+    ld_types, ld_summary = [], []
     for s in soup.find_all("script", type="application/ld+json"):
         try:
             data = json.loads(s.string or "")
             items = data if isinstance(data, list) else data.get("@graph", [data])
             for d in items:
                 ld_types.append(d.get("@type"))
+                addr = d.get("address")
+                ld_summary.append({
+                    "type": d.get("@type"), "keys": sorted(k for k in d if not k.startswith("@")),
+                    "address_empty": isinstance(addr, dict) and not any(k for k in addr if not k.startswith("@")),
+                })
         except Exception:  # noqa: BLE001
             ld_types.append("parse_error")
     f["structured_data_types"] = ld_types
+    f["structured_data"] = ld_summary
 
     for t in soup(["script", "style", "noscript", "template"]):
         t.decompose()
