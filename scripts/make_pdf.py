@@ -170,6 +170,75 @@ def rubric_section(W, scored):
     return s
 
 
+def _tbl(rows, widths):
+    t = Table(rows, colWidths=widths, repeatRows=1)
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), LIGHT), ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LINEBELOW", (0, 0), (-1, -1), 0.3, colors.HexColor("#dfe6f2")),
+        ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]))
+    return t
+
+
+def search_console_section(W, sc, findings):
+    """Search Console のエクスポートから計算した事実データ(点数には含めない)。"""
+    f = lambda v, d="—": d if v is None else (f"{v:,}" if isinstance(v, int) else str(v))
+    t = sc["total"]
+    s = [PageBreak(), P("検索での見つかり方(Search Console・事実データ)", H1),
+         P(f"出典: {sc.get('source', 'Google Search Console')}/検索タイプ: {sc.get('search_type', 'ウェブ')}/"
+           f"期間: {t['from']}〜{t['to']}({t['days']}日間)。この欄の数値は点数に含めていません。", SMALL), Spacer(1, 4)]
+    rows = [[P(x, CELLB) for x in ("期間", "クリック", "表示回数", "CTR", "平均掲載順位")],
+            [P("全期間", CELL), P(f(t["clicks"]), CELL), P(f(t["impressions"]), CELL), P(f"{t['ctr']}%", CELL), P(f(t["position"]), CELL)]]
+    for key, label in (("prev28", "前の28日"), ("last28", "直近28日")):
+        w = sc.get(key)
+        if w:
+            rows.append([P(f"{label}({w['from'][5:]}〜{w['to'][5:]})", CELL), P(f(w["clicks"]), CELL),
+                         P(f(w["impressions"]), CELL), P(f"{w['ctr']}%", CELL), P("—", CELL)])
+    s += [_tbl(rows, [W * 0.32, W * 0.15, W * 0.17, W * 0.14, W * 0.22])]
+    h = sc.get("hidden")
+    if h:
+        s.append(P(f"※検索語句の表に出ているのは{h['query_rows']}件で、全クリックの{h['clicks_hidden_pct']}%・全表示回数の"
+                   f"{h['impressions_hidden_pct']}%は、表に出ない検索(匿名化など)によるものです。語句ごとの分析は、この範囲に限られます。", SMALL))
+
+    def page_rows(items, extra_title=False):
+        hdr = ["ページ", "クリック", "表示", "CTR", "順位"] + (["現在のtitle"] if extra_title else [])
+        rows = [[P(x, CELLB) for x in hdr]]
+        for p in items:
+            r = [P(p["page"].replace("www.", "")[:60], CELL), P(f(p["clicks"]), CELL), P(f(p["impressions"]), CELL),
+                 P(f"{p['ctr']}%", CELL), P(f(p["position"]), CELL)]
+            if extra_title:
+                r.append(P(p.get("title") or "(取得できず)", CELL))
+            rows.append(r)
+        return rows
+    if sc.get("protect"):
+        s += [P("守るページ(クリックを生んでいるページ)", H2),
+              _tbl(page_rows(sc["protect"]), [W * 0.46, W * 0.12, W * 0.12, W * 0.14, W * 0.16])]
+    if sc.get("push"):
+        th = sc.get("thresholds", {})
+        s += [P("伸ばすページ(表示されているのにクリックされないページ)", H2),
+              P(f"条件: 表示{th.get('push_min_imp')}回以上・平均順位{th.get('push_max_pos')}位以内・CTR{th.get('push_max_ctr')}%以下。", SMALL),
+              _tbl(page_rows(sc["push"], True), [W * 0.27, W * 0.09, W * 0.09, W * 0.1, W * 0.09, W * 0.36])]
+    if sc.get("zero_click_queries"):
+        rows = [[P(x, CELLB) for x in ("検索語句", "表示", "クリック", "平均順位")]]
+        rows += [[P(q["query"], CELL), P(f(q["impressions"]), CELL), P(f(q["clicks"]), CELL), P(f(q["position"]), CELL)]
+                 for q in sc["zero_click_queries"]]
+        s += [P(f"表示はあるがクリック0の検索語句(表示{sc.get('thresholds', {}).get('zero_min_imp')}回以上)", H2),
+              _tbl(rows, [W * 0.5, W * 0.16, W * 0.16, W * 0.18])]
+    ai = sc.get("ai_features")
+    if ai:
+        mon = "、".join(f"{k}: {v}" for k, v in ai["monthly"].items())
+        pg = "、".join(f"{p['page'].replace('www.', '')[:40]}({p['impressions']})" for p in ai["pages"][:3])
+        s += [P("生成AI機能(AIによる概要など)での表示", H2),
+              P(f"表示回数 合計{ai['impressions']}回(月別 {mon})。主なページ: {pg}。{ai.get('note', '')}", BODY)]
+    cov = sc.get("coverage")
+    if cov:
+        iss = "、".join(f"{i['reason']}({i['pages']}件・検証: {i['validation']})" for i in cov.get("issues", [])) or "なし"
+        s += [P("インデックス登録", H2),
+              P(f"{cov['date']}時点: 登録済み{cov['indexed']}ページ/未登録{cov['not_indexed']}ページ。未登録の理由: {iss}。", BODY)]
+    if findings:
+        s += [P("読み取り(数値から言えること・言えないこと)", H2)] + [P("・" + x, BODY) for x in findings]
+    return s
+
+
 def build(rep, out):
     doc = SimpleDocTemplate(out, pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm,
                             topMargin=16 * mm, bottomMargin=18 * mm,
@@ -205,6 +274,9 @@ def build(rep, out):
         ("LINEBELOW", (0, 0), (-1, -1), 0.3, colors.HexColor("#dfe6f2")),
         ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4)]))
     s += [t]
+
+    if rep.get("search_console"):
+        s += search_console_section(W, rep["search_console"], rep.get("search_console_findings", []))
 
     bench = rep.get("benchmark")
     if bench:
